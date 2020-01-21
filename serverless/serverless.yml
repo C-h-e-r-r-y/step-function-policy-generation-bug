@@ -1,0 +1,38 @@
+service: myservice
+
+frameworkVersion: ">=1.38.0 <2.0.0"
+
+plugins:
+  - serverless-step-functions
+  - serverless-pseudo-parameters
+  - serverless-cf-vars
+  - serverless-parameters
+
+provider:
+  name: aws
+  stage: ${opt:stage}
+  region: us-east-2
+
+custom:
+  varFile:                                          ../vars.yml
+  MyArn:                                            ${file(${self:custom.varFile}):custom.MyArn}
+
+stepFunctions:
+  stateMachines:
+    MyStateMachine:
+      name: "my_state_machine"
+      definition:
+        StartAt: Start
+        States:
+          Start:
+            Type: Task
+            Resource: "${self:custom.MyArn}"
+            Parameters:
+              arnAsValue: "${file(${self:custom.varFile}):custom.MyArn}"
+            Next: Some
+          "Some":
+            Type: Task
+            Resource: arn:aws:states:::glue:startJobRun.sync
+            Parameters:
+              JobName: myJOb
+            End: true

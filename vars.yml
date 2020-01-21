@@ -1,0 +1,7 @@
+---
+application: my_app
+
+custom:
+  Name:                                             ${file(${self:custom.varFile}):application}_dev
+
+  MyArn:                                            arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${file(${self:custom.varFile}):custom.Name}
